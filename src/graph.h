@@ -6,6 +6,7 @@
 #include <fstream>
 #include <regex>
 #include <cmath>
+#include <set>
 #include "Nodes.h"
 #include "Edges.h"
 
@@ -24,7 +25,6 @@ class Graph {
         string getPath(string from, string to);
 
         string dfsTag(node_t* node);
-        string dfsTag(string from);
 
 
     public:
@@ -44,6 +44,8 @@ class Graph {
         // path
         string bfs(string from, string to);
         string dijkstra(string from, string to);
+        string dfsTag(string from);
+
 };
 
 

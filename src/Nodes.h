@@ -4,6 +4,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <set>
 
 using namespace std;
 
@@ -13,9 +14,13 @@ struct node_t {
     int reachTime, exitTime;
     double weight;
     string cameFrom;
+    set<string> reachSet;
 
     node_t() : name(""), inDegree(0), outDegree(0), weight(0), reachTime(0), exitTime(0), cameFrom("") {}
-    node_t(string name) : name(name), inDegree(0), outDegree(0), weight(0), reachTime(0), exitTime(0), cameFrom("") {}
+
+    node_t(string name) : name(name), inDegree(0), outDegree(0), weight(0), reachTime(0), exitTime(0), cameFrom("") {
+        reachSet.insert(name);
+    }
 };
 
 class Nodes {
@@ -36,6 +41,10 @@ class Nodes {
         vector<node_t> getNodesVector ();
         void setNode(node_t node);
         vector<node_t> getBase();
+        set<string> getReachSet(string nodeName);
+        string toString(node_t node);
+        void addSet(string from, string str);
+        vector<node_t> getUnreached();
 };
 
 

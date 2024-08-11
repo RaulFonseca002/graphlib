@@ -8,9 +8,10 @@ int main(int argc, char const *argv[])
 
     while (getline(inputFile, inputString)) {
         graph.set(inputString);
+        graph.tagEdges();
+        graph.print();
     }
 
-    graph.tagEdges();
-    graph.print();
+
     return 0;
 }

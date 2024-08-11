@@ -12,7 +12,7 @@ elif [ "$1" = "debug" ]; then
 	
 else
 	echo "building"
-	g++ src/main.cpp src/graph.cpp src/Nodes.cpp src/Edges.cpp src/path.cpp -o bin/main
+	g++ -std=c++11 src/main.cpp src/graph.cpp src/Nodes.cpp src/Edges.cpp src/path.cpp -o bin/main
 	echo "running"
 	./bin/main
 	echo "\nprogram end"

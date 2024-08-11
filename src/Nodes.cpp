@@ -32,8 +32,9 @@ void Nodes::remove(string nodeName){
 
 void Nodes::print(){
 
+
     for(auto x : nodes){
-        printf("node: %s reach time: %i exit time: %i\n", x.first.c_str(), x.second.reachTime, x.second.exitTime);
+        printf("%s\n", toString(x.second).c_str());
     }
 }
 
@@ -65,6 +66,47 @@ vector<node_t> Nodes::getBase(){
 
     for(auto it : nodes){
         if(it.second.inDegree == 0) resp.push_back(it.second);
+    }
+
+    return resp;
+}
+
+string setToString(set<string> strSet){ //this should be in the ultils file
+
+    string resp = "";
+    
+    for(auto it : strSet){
+        resp += " " + it;
+    }
+
+    return resp;
+}
+
+set<string> Nodes::getReachSet(string nodeName){
+    return getNode(nodeName).reachSet;
+}
+
+string Nodes::toString(node_t node){ 
+
+    string resp = "";
+
+    resp += "node name: " + node.name + " ";
+    resp += "reach set: " + setToString(getReachSet(node.name));
+
+    return resp;
+}
+
+void Nodes::addSet(string from, string to){
+    set<string> setTo = getNode(to).reachSet;
+    getNodePtr(from)->reachSet.insert(setTo.begin(), setTo.end());
+}
+
+vector<node_t> Nodes::getUnreached(){
+    
+    vector<node_t> resp;
+
+    for(auto it : nodes){
+        if (it.second.cameFrom == "") resp.push_back(it.second);
     }
 
     return resp;

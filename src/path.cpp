@@ -5,10 +5,20 @@ int dfsTime = 0;
 
 void Graph::tagEdges(){
 
+    vector<node_t> unreached;
+
     for(node_t node : nodes.getBase()){
         dfsTag(node.name);
     }
 
+    unreached = nodes.getUnreached();
+
+    while (!unreached.empty()) {
+        printf("%s", unreached.at(0).name.c_str());
+        dfsTag(unreached.at(0).name);
+        unreached = nodes.getUnreached();
+    }
+    
 }
 
 string Graph::dfsTag(string from) {
@@ -24,6 +34,7 @@ string Graph::dfsTag(node_t* node){
     edge_t* edgeAux;
 
     node->reachTime = dfsTime;
+    node->cameFrom = node->name;
     dfsTime++;
     
     for(auto it : edges.getEdges(node->name)){
