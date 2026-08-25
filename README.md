@@ -1,16 +1,40 @@
 # graphlib
 
-A small C++ graph library built for an algorithms course: a `Graph` class over
-separate node and edge stores, with DFS edge classification, BFS, and Dijkstra.
+A small C++ graph library built for an algorithms course. It parses graphs from a
+text format, classifies every edge with a DFS, and finds paths with BFS and
+Dijkstra.
 
-The point of the exercise was the classification pass. Running DFS and labelling
-every edge as a **tree**, **back**, **forward**, or **cross** edge is what turns a
-traversal into something you can reason about — back edges mean cycles, cross
-edges mean disconnected subtrees.
+The classification pass is the part the exercise was really about. Running a DFS
+and labelling each edge as **tree**, **back**, **forward**, or **cross** turns a
+traversal into something you can reason about: a back edge means the graph has a
+cycle, a cross edge means you reached a vertex in a subtree you had already
+finished.
+
+## How it fits together
+
+`Graph` owns two stores. `Nodes` holds the vertices, each with a name, an index,
+in and out degree, and a flag for whether the traversal has reached it. `Edges`
+holds the connections, each with a source, a target, a weight, and the tag the
+classification pass writes into it.
+
+`Graph::set` takes one line of the text format and fills both stores. It reads
+the direction flag first, then registers the node names, then walks the edge list
+and calls `addEdge` for each entry. For an undirected graph it inserts the
+reverse edge too, which is why `removeEdge` drops both directions.
+
+`tagEdges` runs the classification. It calls `dfsTag` from every node in turn,
+and each call marks the nodes it reaches and tags the edges it crosses. When the
+first sweep finishes it asks `Nodes` for the vertices nothing reached and
+restarts from one of those, repeating until the unreached set is empty. That way
+a disconnected graph still gets every edge in every component labelled.
+
+`bfs` and `dijkstra` both work over the same stores. `bfs` walks outward level by
+level and ignores weights. `dijkstra` keeps a running distance per node, relaxes
+each edge against it, and returns the cheapest path once the target settles.
 
 ## Graph format
 
-Graphs are read from a text file, one per line:
+One graph per line:
 
 ```
 d/a,b,c,d/{0,a,b},{0,b,c},{0,c,d},{0,d,a}
@@ -19,8 +43,8 @@ d/a,b,c,d/{0,a,b},{0,b,c},{0,c,d},{0,d,a}
 └───────────── `d` for directed, `nd` for undirected
 ```
 
-`src/main.cpp` reads `input.txt`, builds each graph, tags its edges, and prints
-the result:
+`src/main.cpp` reads `input.txt`, builds each graph on the line, tags its edges,
+and prints the result:
 
 ```
 node name: a reach set:  a
@@ -43,25 +67,20 @@ g.addNode("d");
 g.addEdge("c", "d", 2.5);
 g.removeEdge("a", "b");
 
-g.tagEdges();                  // DFS classification over every component
-g.dfsTag("a");                 // classification from one start node
+g.tagEdges();                  // classify every edge, all components
+g.dfsTag("a");                 // classify from one start node
 g.bfs("a", "d");               // unweighted shortest path
 g.dijkstra("a", "d");          // weighted shortest path
 g.print();
 ```
 
-`tagEdges()` covers disconnected graphs: after the first DFS it repeatedly picks
-an unreached node and restarts, so every edge in every component gets a label.
-
-Undirected graphs are stored as edge pairs — `removeEdge` drops both directions.
-
 ## Layout
 
 | File | Holds |
 |---|---|
-| `src/graph.{h,cpp}` | `Graph` — parsing, node/edge mutation, printing |
+| `src/graph.{h,cpp}` | `Graph`: parsing, node and edge mutation, printing |
 | `src/Nodes.{h,cpp}` | node store, in/out degree, reach tracking |
-| `src/Edges.{h,cpp}` | edge store with weights |
+| `src/Edges.{h,cpp}` | edge store with weights and tags |
 | `src/path.{h,cpp}` | `dfsTag`, `bfs`, `dijkstra` |
 
 ## Building
@@ -72,13 +91,16 @@ Undirected graphs are stored as edge pairs — `removeEdge` drops both direction
 ./make.sh         # build and run
 ```
 
-Requires a C++11 compiler. `bin/` must exist.
+Needs a C++11 compiler, and `bin/` has to exist.
 
 ## Limitations
 
-- Reads `input.txt` from the working directory; the path is not configurable.
-- Node names are strings looked up linearly, so this is not built for large graphs.
-- `src/path.h` declares free `dfs`/`bfs`/`dijkstra` functions that are unused
-  leftovers — the working implementations are the `Graph` methods.
+- `main` reads `input.txt` from the working directory. The path is not
+  configurable.
+- Node lookup is linear over the name list, so this is not built for large
+  graphs.
+- `src/path.h` still declares free `dfs`, `bfs`, and `dijkstra` functions left
+  over from an earlier shape. The working implementations are the `Graph`
+  methods; the free `dfs` has an empty body.
 - No test suite. Correctness was checked by reading the printed classification
   against hand-worked examples.
